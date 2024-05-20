@@ -1,2 +1,6 @@
-output/
-results/
+# Ignorar todas las carpetas 'adapters' y 'adapters_best_val' en cualquier parte del repositorio
+**/adapters/
+**/adapters_best_val/
+**/tokenizer
+*.npy
+*.DS_Store
