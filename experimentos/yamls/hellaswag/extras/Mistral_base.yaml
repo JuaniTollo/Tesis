@@ -1,0 +1,4 @@
+model: "mistralai/Mistral-7B-v0.1"
+data: "hellaswag"
+seed: 0
+based-model: true
