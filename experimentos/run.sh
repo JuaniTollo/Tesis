@@ -4,7 +4,13 @@
 BASE_DIR=$(dirname "$(realpath "$0")")
 echo $BASE_DIR 
 # Activar el entorno virtual
-source "$BASE_DIR/../../env/bin/activate" || { echo "Failed to activate virtual environment"; exit 1; }
+
+# For Bash
+# Correctly source the conda.sh script to initialize Conda
+source /opt/anaconda3/etc/profile.d/conda.sh
+
+# Activate the correct Conda environment
+conda activate tesis_conda
 
 # Ruta al archivo YAML proporcionada como primer argumento
 YAML_PATH="$1"
@@ -61,7 +67,7 @@ fi
 TEST_TARGETS_PATH="$EXPERIMENT_DIR//test_all_targets.npy"
 
 # Verificar si existe el archivo
-if [ ! -f "$TEST_TARGETS_PATH" ] && [-f CURVAS_PATH ]; then
+if [ ! -f "$TEST_TARGETS_PATH" ] && [ -f "$CURVAS_PATH" ]; then
     ADAPTER_TEST_PATH="$EXPERIMENT_DIR/adapters_best_val"
     # Ejemplo adicional con adapter-path y test
     CMD="python -m mlx_lm.lora \

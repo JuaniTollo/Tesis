@@ -1,0 +1,8 @@
+mlx>=0.8
+numpy
+transformers>=4.38.0
+protobuf
+pyyaml
+jinja2
+seaborn
+

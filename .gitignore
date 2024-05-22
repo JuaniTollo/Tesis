@@ -1,0 +1,12 @@
+# Excluir carpetas de adapters y best_adapters
+**/output/
+**/yamls/
+# Excluir archivos .npy
+*.npy
+*.png
+**/env_conda/
+# Excluir archivos de sistema de Mac (como .DS_Store)
+.DS_Store
+
+# Excluir archivos y carpetas relacionadas con tokenizer
+**/tokenizer/

@@ -35,6 +35,7 @@ def list_leaf_directories(root_dir, ignore_dirs=None):
         if is_leaf_directory(root, ignore_dirs):
             leaf_directories.append(root)
     return leaf_directories
+
 def parse_path(path):
     # Dividir la ruta en partes
     

@@ -11,9 +11,11 @@ CONFIG_YAML=$1
 # Base directory calculation
 BASE_DIR=$(dirname "$(realpath "$0")")
 
-# Use explicitly the Python interpreter from the virtual environment
-source "$BASE_DIR/../../env/bin/activate" || { echo "Failed to activate virtual environment"; exit 1; }
-echo "Virtual environment activated at: $VIRTUAL_ENV"
+# Correctly source the conda.sh script to initialize Conda
+source /opt/anaconda3/etc/profile.d/conda.sh
+
+# Activate the correct Conda environment
+conda activate tesis_conda
 
 # Read configurations from the provided YAML file
 MODEL=$(yq e '.model' "$CONFIG_YAML")
