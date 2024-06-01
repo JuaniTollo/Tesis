@@ -1,9 +1,0 @@
-model: "microsoft/phi-1.5"
-data: "hellaswag"
-iters: 2000
-adapter-path: "adapters"
-seed: 0
-lora-layers: 20
-batch-size: 5
-base-model: False  # Corrected key
-learning-rate: 1e-5

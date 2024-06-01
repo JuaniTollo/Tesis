@@ -1,0 +1,5 @@
+python -m memory_profiler mlx_lm.lora \
+  --model microsoft/phi-2 \
+  --base_model True \
+  --test \
+  --data "./Users/juantollo/Documents/Tesis/data/socialiqa-test/dataset"

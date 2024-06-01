@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# Check if a YAML file was passed as an argument
-if [ "$#" -ne 1 ]; then
-    echo "Usage: $0 <config_yaml>"
-    exit 1
-fi
-
 CONFIG_YAML=$1
 
 # Base directory calculation
@@ -19,7 +13,7 @@ conda activate tesis_conda
 
 # Read configurations from the provided YAML file
 MODEL=$(yq e '.model' "$CONFIG_YAML")
-BASE_MODEL=$(yq e '.base-model' "$CONFIG_YAML")  # Ensure correct key is used, not 'based-model'
+BASE_MODEL=$(yq e '.based-model' "$CONFIG_YAML")  # Corrected to match the YAML field
 DATA=$(yq e '.data' "$CONFIG_YAML")
 ADAPTER=$(yq e '.adapter-path' "$CONFIG_YAML" || echo "")
 echo "base model" $BASE_MODEL
@@ -36,10 +30,11 @@ echo "Data directory: $DATA_DIR",
 if [ "$BASE_MODEL" = true ]; then
     EXPERIMENT_DIR="$BASE_DIR/output/${MODEL}/${DATA}/Base/"
 else
-    EXPERIMENT_DIR="${BASE_DIR}/output/${MODEL}/$(basename ${DATA})/${LORA_LAYERS}/${BATCH_SIZE}/${ITERS}/${LEARNING_RATE}//"
-fi
+    # Change directly to the directory where the YAML file is located
+    EXPERIMENT_DIR=$(dirname "$CONFIG_YAML")
 
-echo "Experiment directory: $EXPERIMENT_DIR"
+cd "$EXPERIMENT_DIR" || exit 1
+echo "Changed to directory of the YAML file: $EXPERIMENT_DIR"
 
 # Intenta crear el directorio si no existe
 if [ ! -d "$EXPERIMENT_DIR" ]; then
@@ -58,10 +53,11 @@ cd "$EXPERIMENT_DIR" || exit 1
 echo "Changed to experiment directory successfully"
 
 # Properly quote the command components to handle paths with spaces
-CMD="python -m mlx_lm.lora \
-  --model \"$MODEL\" \
+CMD="python -m memory_profiler mlx_lm.lora \
+  --model $MODEL \
+  --base_model \"$BASE_MODEL\" \
   --test \
-  --adapter \"adapters\" \
+  --adapter \"adapters_best_val\" \
   --data \"$DATA_DIR\""
 #  --base_model \"$BASE_MODEL\" \
 # Execute the experiment command

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Directorio donde están los archivos YAML
-CONFIG_DIR="./yamls/hellaswag"
+CONFIG_DIR="./yamls"
 echo "Current directory: $(pwd)"
 echo "YAML config directory: $CONFIG_DIR"
 

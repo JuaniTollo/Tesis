@@ -4,6 +4,6 @@ iters: 5000
 adapter-path: "adapters"
 seed: 0
 lora-layers: 1
-batch-size: w
+batch-size: 2
 based-model: False
 learning-rate: 1e-5

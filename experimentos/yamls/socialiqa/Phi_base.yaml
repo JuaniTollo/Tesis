@@ -1,4 +1,0 @@
-model: "microsoft/phi-1.5"
-data: "socialiqa"
-seed: 0
-based-model: true

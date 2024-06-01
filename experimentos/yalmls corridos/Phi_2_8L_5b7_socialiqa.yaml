@@ -1,0 +1,9 @@
+model: microsoft/phi-2
+data: "socialiqa"
+iters: 10000
+adapter-path: "adapters"
+seed: 0
+lora-layers: 16
+batch-size: 5
+base-model: false  # Corrected key
+learning-rate: 1e-4

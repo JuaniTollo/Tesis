@@ -48,23 +48,22 @@ DATA_DIR=$(realpath "$BASE_DIR/../data/processed/$DATA")
 CURVAS_PATH="$EXPERIMENT_DIR//Train_loss.csv"
 if [ ! -f "$FILE_PATH" ]; then
   # Ejecutar comandos para operaciones del modelo
-  CMD="python -m mlx_lm.lora \
-      --model \"$MODEL\" \
-      --train \
-      --data \"$DATA_DIR\" \
-      --iters $ITERS \
-      --seed $SEED \
-      --lora-layers $LORA_LAYERS \
-      --adapter-path \"$ADAPTER\" \
-      --batch-size $BATCH_SIZE \
-      --learning-rate $LEARNING_RATE"
-
+CMD="python -m mlx_lm.lora \
+    --model \"$MODEL\" \
+    --train \
+    --data \"$DATA_DIR\" \
+    --iters $ITERS \
+    --seed $SEED \
+    --lora-layers $LORA_LAYERS \
+    --adapter-path \"$ADAPTER\" \
+    --batch-size $BATCH_SIZE \
+    --learning-rate $LEARNING_RATE"
   echo "Running command in $EXPERIMENT_DIR: $CMD"
   eval $CMD
 fi
 
 # Definir la ubicación del archivo
-TEST_TARGETS_PATH="$EXPERIMENT_DIR//test_all_targets.npy"
+TEST_TARGETS_PATH="$EXPERIMENT_DIR//train_all_targets.npy"
 
 # Verificar si existe el archivo
 if [ ! -f "$TEST_TARGETS_PATH" ] && [ -f "$CURVAS_PATH" ]; then
@@ -72,7 +71,7 @@ if [ ! -f "$TEST_TARGETS_PATH" ] && [ -f "$CURVAS_PATH" ]; then
     # Ejemplo adicional con adapter-path y test
     CMD="python -m mlx_lm.lora \
       --model \"$MODEL\" \
-      --adapter-path \"$ADAPTER\" \
+      --adapter-path \"$ADAPTER_TEST_PATH\" \
       --test \
       --data \"$DATA_DIR\""
     echo "Running command: $CMD"

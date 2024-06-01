@@ -1,0 +1,6 @@
+model: microsoft/phi-1.5
+data: "socialiqa"
+iters: 5000
+adapter-path: "adapters"
+seed: 0
+base-model: true  # Corrected key
