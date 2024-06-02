@@ -1,0 +1,84 @@
+\subsection{Explicación experimento}
+
+Los experimentos involucraron en la adaptación de los modelos Phi 1.5 y Phi 2 para un subconjunto de 5000 instancias elegidos al azar de los conjuntos de entrenamiento de Social IQA y Hellaswag, los cuales contenían 33 mil y 39 mil instancias respectivamente. A pesar de la reducción significativa en el número de instancias de entrenamiento,la adaptación resultó en mejoras relevantes comparado con los modelos base originales de Phi.
+
+Realizamos una sola modificación al código de entrenamiento de Lora. en lugar de solo guardar el último modelo en intervalos fijos de iteraciones, también conservamos el modelo que demostró el mejor desempeño en el conjunto de validación. Este enfoque nos permite evitar la retención del último modelo ajustado, que podría estar sobreajustado a los datos de entrenamiento
+
+Los resultados obtenidos para los modelos base de Phi 1.5 y y Phi 2 fueron consistentes con los publicados por Microsoft en sus informes. \cite{abdin2024phi3} \cite{li2023textbooks} No obstante, notamos una diferencia significativa en SoiciaIQA base para Phi 1.5. Microsoft reporta un \textit{accuracy} de 0.53
+mientras que nosotros obtuvimos un 0.59 de \textit{accuracy}.  \ref{tab:performance_comparison}. Ambos modelos deberían tener resultados similares porque no se ajustaron los pesos. Puede ser que haya habido algún cambio del modelo Phi 1.5 o bien que la diferencia sea por el subconjunto de entrenamiento que seleccionamos al azar.
+
+En dicha tabl, presentamos los resultados de los modelos ajustados los conjuntos de testeo de ambos data sets. Seleccionamos los modelos ajustados que reportaron un \textit{accuracy} más alto en el conjunto de validación. Observamos que tanto en el conjunto Hellaswag como en SocialIQA el ajuste de los modelos base con LoRa mejora el \textit{accuracy} . En Phi 1.5 al ajustarse pasa de 0.59 a 0.61 de accuracy en SocialIQA y de 0.38 a 0.4 de accuracy en Hellaswag. En el caso de Phi 2 también se ve una mejora, incluso más considerable en SocialIQA que pasa de 0.67 a 0.72 el accuracy 
+
+En el caso del ajuste del modelo Phi 1.5 en las tareas SocialIQA la mejora parece acotada. Todavía tiene mucha distancia con un modelo Phi 2 base. En cambio en para las tareas de Hellaswag sí observamos que Phi 1.5 ajustado se desempeña igual o mejor que Phi 2. \\
+\begin{table}[h!]
+\centering
+\begin{tabular}{lrr}
+\toprule
+Modelo & SocialIQA & Hellaswag \\
+\midrule
+phi-1.5 - Base & 0.59 & 0.38 \\
+phi-1.5 - Fine-tuned & 0.61 & 0.46 \\
+phi-2 - Base & 0.67 & 0.44 \\
+phi-2 - Fine-tuned & 0.72 & 0.56 \\
+\bottomrule
+\end{tabular}
+
+\caption{Comparación modelos Base vs. con fine tuning}
+\label{tab:performance_comparison}
+\end{table}
+Phi 2 ajustado con LoRa logra buen desempeño superando a modelos mucho más grandes como Chat GPT 3.5 con 350 billones de parámetros. Por ejemplo, en la verisón instruct  GPT 3.5 tiene un accuracy de 0.71, un poco menor al 0.72 de Phi 2. 
+
+Aún así entre estos modelos hay una distancia respecto a la performance de los humanos que es de 88,5\cite{bauer2021identify}. El desempeño regular puede estar relacionado con que en el campo de tareas de sentido común se requiere un profundo entendimiento de las formas de comportarse humanas y las interacciones sociales puede deberse a que aparecen más infrequentemente en los corpus de texto de pre-entrenamiento. Es decir, los modelos de lenguaje deberían aprender más de las formas de actuar de los humanos que del significado semántico de las palabras. \cite{bian2024chatgpt}. 
+
+\subsection{Ajuste de Hiperparámetros}
+\subsubsection{Capas de Lora}
+
+Los modelos Phi tienen capas de \textit{transformers} cada una con sus cabezas de atención. El hiperparámetro capas lora es cuántas capas de transformers, con sus respectivas matrices de pesos $W_k,W_q y W_v$, vamos a considerar contando desde la salida del modelo. En el caso de los modelos base lo reportamos como haber ajustado cero capas de transformers. En la figura \ref{fig:comparison} presentamos los resultados de la variación de las capas LoRa. y vimos que la técnica LoRa no ajustaba sobre las MLP que estaban al final de las capas transformers. 
+
+\begin{figure}[H]
+    \centering
+    \begin{tabular}{cc}
+        \begin{subfigure}{0.45\textwidth}
+            \centering
+            \includegraphics[width=\linewidth]{plots/Accuracy Validación_Comparison_for_SocialiQA_Dataset.png}
+            \caption{Accuracy Validación para SocialiQA}
+            \label{fig:socialiqa_accuracy}
+        \end{subfigure} &
+        \begin{subfigure}{0.45\textwidth}
+            \centering
+            \includegraphics[width=\linewidth]{
+            plots/Accuracy Validación_Comparison_for_HellaSwag_Dataset.png}
+            \caption{Accuracy Validación para HellaSwag}
+            \label{fig:hellaswag_accuracy}
+        \end{subfigure} \\
+
+        \begin{subfigure}{0.45\textwidth}
+            \centering
+            \includegraphics[width=\linewidth]{plots/EC Validación_Comparison_for_SocialiQA_Dataset.png}
+            \caption{EC Validación para SocialiQA}
+            \label{fig:socialiqa_ec}
+        \end{subfigure} &
+        \begin{subfigure}{0.45\textwidth}
+            \centering
+            \includegraphics[width=\linewidth]{plots/EC Validación_Comparison_for_HellaSwag_Dataset.png}
+            \caption{EC Validación para HellaSwag}
+            \label{fig:hellaswag_ec}
+        \end{subfigure}
+    \end{tabular}
+    \caption{Compaciónn de las métricas Accuracy y Entropía Cruzada en el conjunto de validación de los datasets SocialIQA y HellaSwag. La primera columna muestran los resultados para SocialiQA, mientras que la segunda los resultados para HellaSwag. Las capas de Lora cumplen un rol clave en el ajuste de los modelos}
+    \label{fig:comparison}
+\end{figure}
+
+
+Por columna data set 
+Primera columna SQA Segunda columna HS
+Tasa de error
+CENormalizada
+
+\subsection{Variación del rango de Lora}
+
+
+\subsection{Otros de hiperparametros}
+Curvas de perdida
+Learning rate
+Iteraciones
