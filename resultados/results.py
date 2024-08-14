@@ -37,11 +37,10 @@ def list_leaf_directories(root_dir, ignore_dirs=None):
 
 def parse_path(path):
     # Dividir la ruta en partes
-    
+
     parts = path.split('/')
     
     # Crear un diccionario para almacenar los datos extraídos
-    
     if parts[6] != "Base":
         info = {
             "Empresa": parts[3],  # El tercer elemento es la empresa
@@ -98,6 +97,7 @@ ignore_folders = ['adapters', 'adapters_best_val', 'tokenizer', 'resultados con 
 leaf_dirs = list_leaf_directories(root_directory, ignore_folders)
 
 for dir in leaf_dirs[:]:
+    #pdb.set_trace()
     try:
         prefixes = ["train", "val", "test"]
         print(dir)
@@ -108,7 +108,6 @@ for dir in leaf_dirs[:]:
 
         # Preparar un DataFrame temporal con los resultados para este directorio
     # Crear el DataFrame incluyendo métricas para train, val y test
-   
     temp_df = pd.DataFrame({
         "Empresa": info_experimento["Empresa"],
         "Dataset": info_experimento["Dataset"],

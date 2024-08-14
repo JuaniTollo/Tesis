@@ -1,0 +1,6 @@
+python -m memory_profiler mlx_lm.lora \
+  --model "microsoft/phi-2" \
+  --base_model "false" \
+  --test \
+  --adapter \"adapters_best_val\" \
+  --data "/Users/juantollo/Documents/Tesis/data/processed/hellaswag" \

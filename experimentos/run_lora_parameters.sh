@@ -2,7 +2,7 @@
 
 # Determina el directorio donde se encuentra run.sh
 BASE_DIR=$(dirname "$(realpath "$0")")
-echo $BASE_DIR 
+echo "$BASE_DIR"
 
 # Activar el entorno virtual
 source /opt/anaconda3/etc/profile.d/conda.sh
@@ -10,7 +10,7 @@ conda activate tesis_conda
 
 # Ruta al archivo YAML proporcionada como primer argumento
 YAML_PATH="$1"
-echo $YAML_PATH
+echo "$YAML_PATH"
 
 # Verifica la existencia del archivo YAML
 if [ ! -f "$YAML_PATH" ]; then
@@ -30,10 +30,10 @@ LEARNING_RATE=$(yq e '.learning-rate' "$YAML_PATH")
 BASE_MODEL=$(yq e '.base-model' "$YAML_PATH")
 RANK=$(yq e '.lora_parameters.rank' "$YAML_PATH")
 
-echo $DATA, $MODEL, $BASE_MODEL
+echo "$DATA, $MODEL, $BASE_MODEL"
 
 # Cambiar al directorio del experimento que ahora incluye learning rate y rank
-EXPERIMENT_DIR="$BASE_DIR/output/${MODEL}/$(basename ${DATA})/${LORA_LAYERS}/${BATCH_SIZE}/${ITERS}/${LEARNING_RATE}/${RANK}"
+EXPERIMENT_DIR=$(dirname "$YAML_PATH")
 mkdir -p "$EXPERIMENT_DIR"
 cd "$EXPERIMENT_DIR" || exit 1
 
@@ -57,12 +57,11 @@ if [ ! -f "$EXPERIMENT_DIR/Train_loss.csv" ]; then
     eval $CMD
 fi
 
-
 # Definir la ubicación del archivo
-TEST_TARGETS_PATH="$EXPERIMENT_DIR//train_all_targets.npy"
+TEST_TARGETS_PATH="$EXPERIMENT_DIR/train_all_targets.npy"
 
 # Verificar si existe el archivo
-if [ ! -f "$TEST_TARGETS_PATH" ] && [ -f "$CURVAS_PATH" ]; then
+if [ ! -f "$TEST_TARGETS_PATH" ]; then
     ADAPTER_TEST_PATH="$EXPERIMENT_DIR/adapters_best_val"
     # Ejemplo adicional con adapter-path y test
     CMD="python -m mlx_lm.lora \
@@ -73,5 +72,5 @@ if [ ! -f "$TEST_TARGETS_PATH" ] && [ -f "$CURVAS_PATH" ]; then
     echo "Running command: $CMD"
     eval "$CMD"
 else
-    echo "El archivo 'test_all_targets.npy' existe en la ubicación $EXPERIMENT_DIR"
+    echo "El archivo 'train_all_targets.npy' existe en la ubicación $EXPERIMENT_DIR"
 fi

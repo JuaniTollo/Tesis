@@ -13,7 +13,8 @@ conda activate tesis_conda
 
 # Read configurations from the provided YAML file
 MODEL=$(yq e '.model' "$CONFIG_YAML")
-BASE_MODEL=$(yq e '.based-model' "$CONFIG_YAML")  # Corrected to match the YAML field
+#BASE_MODEL=$(yq e '.based-model' "$CONFIG_YAML")  # Corrected to match the YAML field
+BASE_MODEL=$(yq e '.base-model' "$CONFIG_YAML" | tr -d '[:space:]')
 DATA=$(yq e '.data' "$CONFIG_YAML")
 ADAPTER=$(yq e '.adapter-path' "$CONFIG_YAML" || echo "")
 echo "base model" $BASE_MODEL
@@ -30,13 +31,13 @@ echo "Data directory: $DATA_DIR",
 if [ "$BASE_MODEL" = true ]; then
     EXPERIMENT_DIR="$BASE_DIR/output/${MODEL}/${DATA}/Base/"
 else
-    # Change directly to the directory where the YAML file is located
     EXPERIMENT_DIR=$(dirname "$CONFIG_YAML")
+fi
 
 cd "$EXPERIMENT_DIR" || exit 1
 echo "Changed to directory of the YAML file: $EXPERIMENT_DIR"
 
-# Intenta crear el directorio si no existe
+# Try to create the directory if it does not exist
 if [ ! -d "$EXPERIMENT_DIR" ]; then
     mkdir -p "$EXPERIMENT_DIR"
     if [ $? -eq 0 ]; then
@@ -48,6 +49,7 @@ if [ ! -d "$EXPERIMENT_DIR" ]; then
 else
     echo "Experiment directory already exists"
 fi
+
 # Change to the experiment directory
 cd "$EXPERIMENT_DIR" || exit 1
 echo "Changed to experiment directory successfully"
@@ -59,8 +61,9 @@ CMD="python -m memory_profiler mlx_lm.lora \
   --test \
   --adapter \"adapters_best_val\" \
   --data \"$DATA_DIR\""
-#  --base_model \"$BASE_MODEL\" \
+
 # Execute the experiment command
 echo "Running command: $CMD"
 eval "$CMD"
+
 exit 0

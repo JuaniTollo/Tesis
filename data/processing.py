@@ -77,6 +77,8 @@ def convert_csv_to_jsonl(input_csv_path, output_jsonl_path):
             input_text += f" \nAnswer: {row['targets']}"
             
             # Reemplaza los números por letras en el texto de salida.
+            
+            input_text = input_text.replace("</ctx>", "")
             input_text = input_text.replace("Answer: 0", "Answer: A")
             input_text = input_text.replace("Answer: 1", "Answer: B")
             input_text = input_text.replace("Answer: 2", "Answer: C")

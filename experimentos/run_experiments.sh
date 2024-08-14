@@ -32,4 +32,6 @@ for config_file in "$CONFIG_DIR"/*.yaml; do
     # Optional: Clear RAM Cache - Uncomment the next line if you have the necessary permissions
     # sudo sync && sudo echo 3 > /proc/sys/vm/drop_caches
 done
+
+
 echo "All experiments completed."

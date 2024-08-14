@@ -1,0 +1,88 @@
+\documentclass[a4paper,11pt,titlepage]{article}
+
+% Para manejo avanzado de citas
+%\usepackage[backend=biber, style=authoryear, citestyle=authoryear]{biblatex}
+%\addbibresource{nombre-de-tu-bibliografia.bib} % Asegúrate de cambiar el nombre del archivo
+
+% Para URLs y enlaces dentro del documento
+%\usepackage{hyperref}
+
+% Para símbolos matemáticos y texto mejorado
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{fullpage}
+
+\title{Tesis de Licenciatura en Ciencia de Datos{\Huge \\ Fine tuning  con Lora de modelos de lenguaje natural} }
+\author{Juan Tollo\\{\small juantollo@gmail.com - L.U. 742/19}}
+\date{Director/a: Luciana Ferrer \\{\small lferrer@dc.uba.ar}~\vspace{0.2cm}\\ Co-Director: Lautaro Estienne \\{\small lestienne@dc.uba.ar}}
+
+
+\begin{document}
+
+ 
+ \maketitle
+
+% \newpage
+ 
+\section{Introducción}
+Los modelos de lenguaje grandes (o LLMs, por sus siglas en inglés) son sistemas probabilísticos entrenados para predecir o completar una secuencia de palabras, a partir de su exposición a grandes cantidades de texto no etiquetado manualmente. Estos sistemas devuelven la probabilidad de una palabra de su vocabulario dada una secuencia de palabras previa, la cual puede ser usada para generar texto (sampleando iterativamente de alguna manera esta probabilidad) o para obtener la probabilidad a posteriori (o \emph{posteriors}) de la siguiente palabra. La calidad de estas probabilidades va a determinar cuán bueno será el sistema para resolver una determinada tarea.
+
+El área de procesamiento del lenguaje natural (NLP, por sus siglas en inglés) incluye muchos tipos de tareas y aplicaciones. Algunas de ellas, como la detección de noticias falsas o la respuesta a una pregunta de cultura general, están relacionadas con lo fáctico y evalúan el conocimiento  del modelo sobre el mundo real. Por otro lado, tareas como inferencia del lenguaje natural, extracción de relaciones o comprensión lectora evalúan mayormente la capacidad de razonamiento lógico del modelo. En este trabajo nos limitaremos a este último grupo de tareas.
+
+Actualmente, estos modelos son capaces de resolver tareas de gran dificultad incluso sin ser expuestos a ejemplos específicos de las mismas. Sin embargo, hay mucha evidencia de que adaptar estos modelos a la tarea específica de interés con nuevos ejemplos mejora significativamente el desempeño sobre dicha tarea (e incluso, sobre otras tareas relacionadas también). Existen distintas estrategias para adaptar los modelos a una tarea específica, entre las que se destacan la ingeniería de prompts (\textit{prompt engineering}), el ajuste fino (\textit{fine-tuning}) y la calibración de las posteriors de salida. En este trabajo nos focalizaremos fundamentalmente en analizar la calidad de las \emph{posteriors} del sistema en tareas de razonamiento cuando se utilizan los métodos mencionados, particularmente los últimos dos (calibración y \textit{fine-tuning}).
+
+\section{Objetivos}\label{sec2}
+
+El objetivo de la tesis será estudiar el comportamiento de los LLMs en tareas de razonamiento, analizando particularmente las probabilidades de salida de los mismos y cómo estas se modifican cuando se utilizan distintos métodos para adaptarse a la tarea, fundamentalmente \emph{fine-tuning} y calibración. El método de \textit{fine-tuning} consiste en ajustar total o parcialmente los pesos de la red neuronal del modelo de lenguaje con un proceso similar al mismo que se usó para preentrenarlo, pero sobre un conjunto de datos de entrenamiento correspondientes a una o más tareas de interés. En general, dado el costo computacional que implica entrenar la cantidad de parámetros que contiene un LLM, en los últimos años se han diseñado métodos que entrenan un conjunto selecto de parámetros que, idealmente emulan el desempeño del entrenamiento completo. Estos métodos, conocidos como PEFT por sus siglas en inglés, incluyen diferentes heurísticas sobre cómo definir el conjunto efectivo de parámetros a entrenar. En este trabajo, se compararán diferentes métodos de esta familia y cómo se ven afectadas las salidas del modelo en cada caso. Los métodos específicos se mencionan en la sección \ref{sec3}. También evaluaremos la relación costo-beneficio de estos métodos. 
+
+En algunos casos, el modelo puede presentar un buen desempeño en su capacidad para discriminar una clase de otra pero igualmente estar desadaptado a la tarea específica por un problema de calibración. La calibración de un modelo mide si las salidas del mismo representa efectivamente la distribución de la probabilidad a posteriori de las clases condicionada a la salida generada por el sistema. Un modelo bien calibrado garantiza que no es posible obtener una mejor posterior a partir de esa salida y que, por lo tanto, la salida del sistema sirve para tomar decisiones bayesianas óptimas con el objeto de resolver una tarea específica. En este trabajo se realizará, para el caso de tareas de clasificación, un análisis sobre el tipo de problema (de discriminación o de calibración) que, potencialmente, presentan las \textit{posteriors} del LLM y si este puede ser resuelto calibrando al sistema. Si bien este análisis es complementario al mencionado anteriormente, en la práctica se realiza de manera similar: se realiza una adaptación a la tarea específica entrenando con una función de costo que asegura la obtención de probabilidades a la salida del modelo. Esta función de costo está dada por la esperanza de un \emph{Proper Scoring Rule} (PSR), como, por ejemplo, la cross-entropía.
+
+\section{Métodos}\label{sec3}
+
+\subsection{Modelos}
+Por ajustarnos a nuestra disponibilidad de tiempo y recursos computacionales exploraremos principalmente dos modelos pequeños: Mistral 7B y Llama-2 7B. Ambos modelos utilizan la arquitectura de \textit{transformers} y pertenecen a la familia \textit{only decoder}. La diferencia entre los modelos está en la implementación de los mecanismos de atención en la arquitectura de \textit{transformers}.
+Por cada modelo tenemos dos versiones: una llamada “base” y otra “chat” o “instructions”. La primera es el modelo pre-entrenado sobre un gran corpus de texto no supervisado y la versión \textit{instruction} surge de aplicar \textit{fine-tuning} sobre un conjunto de tareas supervisadas al modelo base. 
+Un problema de los modelos \textit{instructions} es que muchas veces no tenemos control sobre qué datos se usaron para el entrenamiento. Es decir existe el riesgo de que evaluemos al modelo con datos que se usaron para entrenar en etapas previas. Dicho esto, en caso de trabajar con modelos \textit{instruction} trataremos de ser cuidadosos respecto a las afirmaciones y conclusiones que puedan hacerse de su desempeño. 
+
+\subsection{Datasets y métricas}\label{subsec2}
+Se seleccionarán algunas bases de datos para tareas de razonamiento como GLUE, Super-GLUE y Rainbow. 
+Para definir las métricas con las que evaluaremos la calidad de las salidas de los modelos revisaremos la documentación de las métricas de los \textit{datasets}, el trabajo de Ferrer sobre métricas de clasificación \cite{ferrer2023analysis}  y trabajos sobre los que haya consenso en la literatura sobre el tema. 
+
+\subsection{\emph{Fine-tuning} y Calibración}\label{subsec2}
+El costo computacional de modificar todos los parámetros del modelo durante el proceso de \textit{fine-tuning} dio lugar a una familia llamada \textit{Parameter Eficient Fine Tunning} (PEFT). Dentro de estas estrategias nosotros elegiremos aquellas que hagan factible la experimentación, como pueden ser el método de adaptadores, prefijos o LoRA (\emph{Low Rank Adaptation}). Por ejemplo, LoRA congela los pesos del modelo preentrenado e introduce matrices entrenables de bajo rango en cada capa del Transformador (\cite{hu2021lora}).  Con esto se logra una reducción de los parámetros entrenables, disminuyendo los tiempos de entrenamiento.
+
+Para entrenar el calibrador (es decir, el sistema que convierte las salidas del modelo en probabilidades calibradas) se utilizará el método de regresión logística, que es estándar en aplicaciones de calibración y requiere muy bajo costo computacional. 
+
+\section{Factibilidad}\label{sec3}
+Para realizar los experimentos contamos con una Mac Pro con procesador M3 Pro, 36 GB de memoria RAM, 18-core GPU y 16-core Neural Engine y podemos usar la libreria de \textit{Apple} para machine learning MLX (\cite{mlx2023}). Hicimos una prueba para verificar el correcto funcionamiento de esta librería, en la que fue posible finetunear Mistral 7b con LoRA en una base de datos de 1000 muestras en 10 minutos. Para agilizar el entrenamiento seguimos la recomendación de un ejemplo de MLX que usa la estrategia Lora con un \textit{batch} y cuatro \textit{capas lora} \footnote{\{https://github.com/ml-explore/mlx-examples/blob/main/lora/README.md}. Suponemos en base a esta primera prueba piloto que será posible, con este equipamiento, realizar una cantidad satisfactoria de experimentos para mostrar en la tesis.
+
+\section{Cronograma}
+\scalebox{1}{
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{r |@{\timelineBullet} l}
+Semana 1 (18/03 - 24/03) &  Redacción del plan de trabajo\\ 
+                          & Comprensión de métricas y conceptos básicos de calibración\\
+Semana 2 (25/03 - 31/03) & Descarga de set de datos y armado de repositorio \\ 
+                         & Lectura bibliografía fine tuning \\ 
+Semana 3 (01/04 - 07/04) & Generación de los resultados base para comparación posterior\\ 
+Semana 4 (08/04 - 14/04) & Fine-tuning con búsqueda de hiperpámetros con LoRa.\\ 
+Semana 5 (15/04 - 21/04) & Fine-tuning con búsqueda de hiperpámetros con LoRa.\\ 
+Semana 7 (29/04 - 05/05) &  Fine-tuning con búsqueda de hiperpámetros. Metodología a definir\\ 
+Semana 8 (06/05 - 12/05) & Análisis y calibración del modelo\\ 
+Semana 9 (13/05 - 19/05) & Análisis y calibración del modelo\\
+Semana 10 (20/05 - 26/06) & Experimentación con otros modelos y métodos de fine-tuning (opcional)\\ 
+Semana 11 (27/05 - 02/06) & Redacción de tesis\\ 
+Semana 12 (03/06 - 09/06) & Redacción de tesis\\ 
+Semana 13 (12/06) & Entrega de la tesis\\ 
+\end{tabular}
+}
+
+\bibliographystyle{acm}
+
+ \small
+ \bibliography{references.bib}
+\end{document}

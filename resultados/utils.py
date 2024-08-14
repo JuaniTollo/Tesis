@@ -46,7 +46,6 @@ def cargar_logits_y_targets(dir, prefix):
 
 # Función para calcular métricas (Ejemplo)
 def calcular_metricas(logits, targets):
-    
     np.bincount(targets, minlength=3)
     values, counts = np.unique(targets, return_counts=True)
     counts / sum(counts)
@@ -69,19 +68,20 @@ def calcular_metricas(logits, targets):
     mapped_targets = np.array([index_to_position[target] for target in targets if target in index_to_position])
     accuracy_restricted = accuracy_score(mapped_targets, predictions)
     cross_entropy = nn.losses.cross_entropy(mx.array(logits), mx.array(targets), reduction="mean").item()
-    epsilon = 1e-10  # Añadir epsilon para evitar el log de cero
-    priors = np.bincount(targets, minlength=logits.shape[1]) / targets.shape[0]
     
-    # TODO: Volar epsilon y recalcular crosentropy
-    priors *= epsilon
+    priors = np.bincount(targets, minlength=logits.shape[1]) / targets.shape[0]
     priors = np.repeat(priors.reshape(1, -1), len(targets), axis=0)
-
+    logpriors = np.log(priors, where=priors > 0)
+    logpriors[priors <= 0] = -np.inf
+    entropy = nn.losses.cross_entropy(mx.array(logpriors), mx.array(targets), reduction="mean").item()
+    norm_cross_entropy = cross_entropy / entropy
+    
     priors = np.clip(priors, a_min=1e-10, a_max=None)  # Ensure all values are >= 1e-10
     cross_entropy_priors = nn.losses.cross_entropy(mx.array(np.log(priors)), mx.array(targets), reduction="mean").item()
     accuracy = np.mean(np.argmax(logits, axis=1) == targets)
     accuracy_restricted = accuracy  # Supón que es una métrica calculada de manera similar
     
-    return accuracy, accuracy_restricted, priors_to_targets, cross_entropy, cross_entropy_priors
+    return accuracy, accuracy_restricted, priors_to_targets, norm_cross_entropy, cross_entropy_priors
 
 # Función para calcular métricas para cada conjunto de datos
 def calcular_metricas_para_conjuntos(dir, prefixes):
