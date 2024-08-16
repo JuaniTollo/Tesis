@@ -17,7 +17,7 @@ YAML_PATH="$1"
 echo $YAML_PATH
 # Verifica la existencia del archivo YAML
 if [ ! -f "$YAML_PATH" ]; then
-    echo "Error: '$YAML_PATH' no such file or directory"
+    echo "Error: '$YAML_PATH' no such YALM file or directory"
     exit 1
 fi
 
